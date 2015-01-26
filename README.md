@@ -3,7 +3,7 @@ Raspberry Pi Setup
 
 ### Introduction
 
-This tutorial will help you install the Raspberry Pi **without using a keyboard or mouse**. It will also enable SSH auth keys (no passwords required), and also setting up a local hostname (no SSH IPs anymore).
+This tutorial will help you install the Raspberry Pi **without using a keyboard or mouse**. It will also show you how to enable SSH auth keys (no passwords required), and setting up a local hostname (like *raspberrypi.local*, so no IPs anymore).
 
 ### Install OS
 
@@ -13,7 +13,9 @@ This whole tutorial assumes **you are using Rasbian**.
 
 ### Find Raspberry Pi On Your Network
 
-Install [nmap](http://nmap.org/book/install.html "nmap install instructions") and then run:
+If you know the IP of your Pi already, skip this step.
+
+Otherwise, install [nmap](http://nmap.org/book/install.html "nmap install instructions") and then run:
 
 ```
 nmap -sP 192.168.1.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'
@@ -21,21 +23,25 @@ nmap -sP 192.168.1.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'
 
 If you are running through a few routers or something like that, the base IP (192.168.1.XXX) may be different. If this doesn't make sense, [find you local IP first](http://lifehacker.com/5833108/how-to-find-your-local-and-external-ip-address), then use the first 3 sections of that.
 
-This will return an IP that we can use to connect to the Pi. I am *going to pretend* that an IP of **192.168.1.101** was returned.
+This will return an IP that we can use to connect to the Pi. I am *going to pretend* that an IP of **192.168.1.105** was returned.
 
 ### SSH Connect To Pi
 
 The default username for the Pi is `pi`.
 
 ```
-ssh pi@192.168.1.101
+ssh pi@192.168.1.105
 ```
 
 You will also need to enter in a password, the default is `raspberry`. This can be changed in the next step.
 
 ### Setup
 
-Now that you are logged in, you will be asked to run `sudo raspi-config`. Here you can change your password, enable booting to desktop, change your charset/language (I set mine to *en_US.UTF-8*). You should also make sure that your **keyboard is setup correctly and in the correct language**.
+Now that you are logged in, you will be asked to run `sudo raspi-config`.
+
+Here you can change your password, enable booting to desktop, change your charset/language (I set mine to *en_US.UTF-8*). You should also make sure that your **keyboard is setup correctly and in the correct language**.
+
+This command can always be run later, so if things aren't quite right, just run it again and try different settings.
 
 ### Update
 
@@ -50,9 +56,9 @@ This will update the repository and then upgrade the installed programs includin
 
 ### Use SSH Authorized Key
 
-Enabling the use of an authorized key, lets you sign into the Pi without entering in the password each time.
+Enabling the use of an authorized key lets you sign into the Pi without entering in the password each time.
 
-First [generate a key](https://help.github.com/articles/generating-ssh-keys/) and then copy it to your clipboard (this file is commonly generated as *id_rsa.pub*).
+First, [generate a key](https://help.github.com/articles/generating-ssh-keys/) and then **copy it to your clipboard** (the default name for this file is *id_rsa.pub*).
 
 SSH into the Pi, and run:
 
@@ -61,27 +67,41 @@ sudo mkdir ~/.ssh
 sudo nano ~/.ssh/authorized_keys
 ```
 
-Then paste the clipboard and press *^X* (control + X). You want to save, so press `Y` when asked, then hit enter to keep the same filename, this will then close nano and save the file.
+This creates the folder we need as well as starts a new empty file called `authorized_keys`.
+
+Paste the contents of your clipboard and press `^X` (control + X). You want to save, so press `Y` when asked, then *hit enter* to keep the same filename, this will then close nano and save the file.
 
 If you run `cat ~/.ssh/authorized_keys`, you will see your pasted code inside, which should be the exact same as the text from the *.pub* file you generated.
 
-When you next connect to the Pi, you will be asked to add the Pi to your list of known hosts, don't be alarmed. This means that the Pi will now be trusted, and allow you to connect without a password from now on.
+When you next connect to the Pi, you will be asked to add the Pi to your list of known hosts, don't be alarmed. This means that the Pi will now be trusted. This will allow you to connect without a password from now on.
 
 ### Assign A Local Hostname
 
-Assigning a nice hostname (instead of having a dynamic IP you need to find each time), is much nicer.
+Assigning a nice hostname (instead of having a dynamic IP which you need to find each time), is much nicer.
 
 ```
 sudo apt-get install avahi-daemon
 ```
 
-No don't need to restart after the installation. Just open a new terminal tab and try to ping the Pi.
+You don't need to restart after the installation. Just open a new terminal tab and try to *ping the Pi*.
 
 ```
-ping raspberrypi.local
+ping -c 5 raspberrypi.local
 ```
 
-You will see the results in the terminal. You can press *^C* (control + C) to close the `ping` tool.
+You will see the results in the terminal. This will send 5 pings to the Pi, then return a message that has `5 packets transmitted, 5 packets received, 0.0% packet loss` at the bottom.
+
+If your packet loss is *anything other than 0.0%*, then there is a problem.
+
+You can press `^C` (control + C) to close the `ping` tool early.
+
+You can now SSH without using an IP or a password. Yay!
+
+```
+ssh pi@raspberrypi.local
+```
+
+If you have many PIs on your network, you may want to [change the hostname](http://www.howtogeek.com/167195/how-to-change-your-raspberry-pi-or-other-linux-devices-hostname/).
 
 I had some issues with the hostname not resolving. I ended up finding these little commands to reset the hostname. You can append them to a `~/.bash_aliases` file and fix things quickly.
 
@@ -94,19 +114,11 @@ function fix-hostname() {
 }
 ```
 
-You can now SSH without using an IP or a password. Yay!
-
-```
-ssh pi@raspberrypi.local
-```
-
-If you have many PIs on your network, you may want to [change the hostname](http://www.howtogeek.com/167195/how-to-change-your-raspberry-pi-or-other-linux-devices-hostname/).
-
 ## Extras
 
 ### git projects
 
-This is the function I have added to my `~/.bash_aliases` file. It creates a git repo setup so that you can push git repos to your Pi from your localhost.
+This is a function I have added to my `~/.bash_aliases` file that creates a git repo so that you can *push git repos to your Pi from your local machine*.
 
 Before we run this for the first time, we need to create the proper folder:
 
@@ -114,7 +126,7 @@ Before we run this for the first time, we need to create the proper folder:
 sudo mkdir /var/www/git/
 ```
 
-Then we can put this script in the `~/.bash_aliases` file:
+Then we can put this function in the `~/.bash_aliases` file:
 
 ```
 # create a new git enabled project
@@ -137,7 +149,14 @@ function new-project() {
 }
 ```
 
-This is how it would work on your local machine, assuming the project was named `test-site`.
+This is *how it would work on your Pi*, assuming the project was named `test-site`.
+
+```
+new-project test-site
+git remote add dev ssh://pi@raspberrypi.local:/var/www/git/test-site.git
+```
+
+Then on the computer that is *pushing to the Pi*:
 
 ```
 git remote add dev ssh://pi@raspberrypi.local:/var/www/git/test-site.git
@@ -157,7 +176,7 @@ sudo iptables-restore < /etc/iptables.firewall.rules
 sudo nano /etc/network/if-pre-up.d/firewall
 ```
 
-Put this script into that new nano file we started:
+Put this script into that new nano file we started in the last step:
 
 ```
 #!/usr/bin/env sh
@@ -179,16 +198,18 @@ sudo iptables-save
 
 ### Node.js
 
-Download and install an ARM version or Node.js:
+Download and install an ARM version of Node.js:
 
 ```
 wget http://node-arm.herokuapp.com/node_latest_armhf.deb 
 sudo dpkg -i node_latest_armhf.deb
 ```
 
+This will install the latest version of Node.js for ARM (Raspberry Pi CPU). When it is done, try using `node` to enter the node REPL.
+
 ### Luvit
 
-[Luvit](https://github.com/luvit/luvit/) is a framework that wraps up Lua + LibUV + LuaJit.
+[Luvit](https://github.com/luvit/luvit/) is a framework that wraps up *Lua + LibUV + LuaJit*.
 
 ```
 git clone https://github.com/luvit/luvit --branch luvi-up
@@ -197,6 +218,8 @@ export LUVI_APP=`pwd`/app
 make
 make test
 ```
+
+Luvit is a lot like Node.js. One of the key differences being that it is usually used as an embedded language, or it's used on low memory systems. This makes it perfect for the Pi, since Node uses a lot of memory and CPU when not configured precisely.
 
 ### fswebcam
 
@@ -223,11 +246,8 @@ Run `fswebcam --help` to see all the options and flags.
 
 ### Bash and Vim Niceness
 
-We maintain a repo called [Digital Ocean Start](https://github.com/WARPAINTMedia/digital-ocean-start). This is what we use for our Digital Ocean servers whenever we set them up. I think it has some sensible defaults for remote servers.
+We maintain a repo called [Digital Ocean Start](https://github.com/WARPAINTMedia/digital-ocean-start).
 
+This is what we use for our Digital Ocean servers whenever we set them up. I think it has some sensible defaults for remote servers.
 
-
-
-
-
-
+This project includes the `new-project` function, albeit a little different than the one in this example.
