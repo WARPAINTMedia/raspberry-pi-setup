@@ -23,7 +23,7 @@ nmap -sP 192.168.1.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'
 
 If you are running through a few routers or something like that, the base IP (192.168.1.XXX) may be different. If this doesn't make sense, [find you local IP first](http://lifehacker.com/5833108/how-to-find-your-local-and-external-ip-address), then use the first 3 sections of that.
 
-This will return an IP that we can use to connect to the Pi. I am *going to pretend* that an IP of **192.168.1.105** was returned.
+This will return an IP that we can use to connect to the Pi.
 
 ##### Nothing Is Returned
 
@@ -39,7 +39,7 @@ You can try **one-by-one** to connect to each IP using `ssh pi@IP_HERE`.
 
 ### SSH Connect To Pi
 
-The default username for the Pi is `pi`.
+I am *going to pretend* that an IP of **192.168.1.105** was returned from the previous command. The default username for the Pi is `pi`.
 
 ```sh
 ssh pi@192.168.1.105
