@@ -7,7 +7,7 @@ This tutorial will help you install the Raspberry Pi **without using a keyboard 
 
 ### Install OS
 
-First [download Rasbian](http://www.raspbian.org/RaspbianInstaller) and [then install it](http://www.raspberrypi.org/documentation/installation/). 
+First [download Rasbian](http://www.raspbian.org/RaspbianInstaller) and [then install it](http://www.raspberrypi.org/documentation/installation/).
 
 This whole tutorial assumes **you are using Rasbian**.
 
@@ -24,6 +24,18 @@ nmap -sP 192.168.1.0/24 | awk '/^Nmap/{ip=$NF}/B8:27:EB/{print ip}'
 If you are running through a few routers or something like that, the base IP (192.168.1.XXX) may be different. If this doesn't make sense, [find you local IP first](http://lifehacker.com/5833108/how-to-find-your-local-and-external-ip-address), then use the first 3 sections of that.
 
 This will return an IP that we can use to connect to the Pi. I am *going to pretend* that an IP of **192.168.1.105** was returned.
+
+##### Nothing Is Returned
+
+If nothing is returned, you can always use the `arp` command. This lets you list all the devices that your computer can see on the network. You can use it like so:
+
+```sh
+arp -a
+```
+
+This will list all the devices that are found in your local network. You will see a list of IPs as well as MAC addresses and device IDs.
+
+You can try **one-by-one** to connect to each IP using `ssh pi@IP_HERE`.
 
 ### SSH Connect To Pi
 
@@ -201,7 +213,7 @@ sudo iptables-save
 Download and install an ARM version of Node.js:
 
 ```sh
-wget http://node-arm.herokuapp.com/node_latest_armhf.deb 
+wget http://node-arm.herokuapp.com/node_latest_armhf.deb
 sudo dpkg -i node_latest_armhf.deb
 ```
 
